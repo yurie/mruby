@@ -17,46 +17,32 @@ typedef struct symbol_name {
   const char *name;
 } symbol_name;
 
-static inline khint_t
-sym_hash_func(mrb_state *mrb, const symbol_name s)
-{
-  khint_t h = 0;
-  size_t i;
-  const char *p = s.name;
-
-  for (i=0; i<s.len; i++) {
-    h = (h << 5) - h + *p++;
-  }
-  return h;
-}
-#define sym_hash_equal(mrb,a, b) (a.len == b.len && memcmp(a.name, b.name, a.len) == 0)
-
-KHASH_DECLARE(n2s, symbol_name, mrb_sym, 1)
-KHASH_DEFINE (n2s, symbol_name, mrb_sym, 1, sym_hash_func, sym_hash_equal)
 /* ------------------------------------------------------ */
 mrb_sym
 mrb_intern2(mrb_state *mrb, const char *name, int len)
 {
-  khash_t(n2s) *h = mrb->name2sym;
-  symbol_name sname;
-  khiter_t k;
+  mrb_sym i;
   mrb_sym sym;
   char *p;
 
-  sname.len = len;
-  sname.name = name;
-  k = kh_get(n2s, h, sname);
-  if (k != kh_end(h))
-    return kh_value(h, k);
+  for (i = 0; i < mrb->symidx; i++) {
+    if (memcmp(mrb->name2sym_array[i], name, len) == 0) {
+      return i+1;
+    }
+  }
+  if (mrb->symidx >= MRB_N2S_SIZE) {
+    //faralエラー
+    exit(0);
+  }
 
+  // 配列の最後尾に登録
   sym = ++mrb->symidx;
   p = mrb_malloc(mrb, len+1);
   memcpy(p, name, len);
   p[len] = 0;
-  sname.name = (const char*)p;
-  k = kh_put(n2s, h, sname);
-  kh_value(h, k) = sym;
+  mrb->name2sym_array[sym-1] = (const char*)p;
 
+  // 
   return sym;
 }
 
@@ -75,39 +61,31 @@ mrb_intern_str(mrb_state *mrb, mrb_value str)
 const char*
 mrb_sym2name_len(mrb_state *mrb, mrb_sym sym, int *lenp)
 {
-  khash_t(n2s) *h = mrb->name2sym;
-  khiter_t k;
-  symbol_name sname;
+  const char* name;
 
-  for (k = kh_begin(h); k != kh_end(h); k++) {
-    if (kh_exist(h, k)) {
-      if (kh_value(h, k) == sym) break;
-    }
-  }
-  if (k == kh_end(h)) {
+  if (sym > mrb->symidx) {
     *lenp = 0;
     return NULL;	/* missing */
   }
-  sname = kh_key(h, k);
-  *lenp = sname.len;
-  return sname.name;
+  name = mrb->name2sym_array[sym-1];
+  *lenp = strlen(name);
+  return name;
 }
 
 void
 mrb_free_symtbls(mrb_state *mrb)
 {
-  khash_t(n2s) *h = mrb->name2sym;
-  khiter_t k;
-
-  for (k = kh_begin(h); k != kh_end(h); k++)
-    if (kh_exist(h, k)) mrb_free(mrb, (char*)kh_key(h, k).name);
-  kh_destroy(n2s,mrb->name2sym);
+  mrb_sym i;
+  for (i=0; i < mrb->symidx-1; i++) {
+    mrb_free(mrb, (char*)mrb->name2sym_array[i]);
+  }
+  mrb->symidx = 0;
 }
 
 void
 mrb_init_symtbl(mrb_state *mrb)
 {
-  mrb->name2sym = kh_init(n2s, mrb);
+  mrb->symidx = 0;
 }
 
 /**********************************************************************

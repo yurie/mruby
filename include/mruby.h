@@ -214,6 +214,8 @@ enum gc_state {
   GC_STATE_SWEEP
 };
 
+#define MRB_N2S_SIZE 1000
+
 typedef struct mrb_state {
   void *jmp;
 
@@ -269,8 +271,10 @@ typedef struct mrb_state {
   mrb_int gc_step_ratio;
 
   mrb_sym symidx;
-  struct kh_n2s *name2sym;      /* symbol table */
-  struct kh_s2n *sym2name;      /* reverse symbol table */
+  const char *name2sym_array[MRB_N2S_SIZE];
+
+  //struct kh_n2s *name2sym;      /* symbol table */
+  //struct kh_s2n *sym2name;      /* reverse symbol table */
 #ifdef INCLUDE_REGEXP
   struct RNode *local_svar;/* regexp */
 #endif
