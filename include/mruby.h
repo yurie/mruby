@@ -208,6 +208,11 @@ typedef struct {
   struct REnv *env;
 } mrb_callinfo;
 
+typedef struct symbol_name {
+  int len;
+  const char *name;
+} symbol_name;
+
 enum gc_state {
   GC_STATE_NONE = 0,
   GC_STATE_MARK,
@@ -271,7 +276,7 @@ typedef struct mrb_state {
   mrb_int gc_step_ratio;
 
   mrb_sym symidx;
-  const char *name2sym_array[MRB_N2S_SIZE];
+  symbol_name name2sym_array[MRB_N2S_SIZE];
 
   //struct kh_n2s *name2sym;      /* symbol table */
   //struct kh_s2n *sym2name;      /* reverse symbol table */

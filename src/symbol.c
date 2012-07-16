@@ -12,21 +12,17 @@
 #include <ctype.h>
 
 /* ------------------------------------------------------ */
-typedef struct symbol_name {
-  int len;
-  const char *name;
-} symbol_name;
-
-/* ------------------------------------------------------ */
 mrb_sym
 mrb_intern2(mrb_state *mrb, const char *name, int len)
 {
   mrb_sym i;
   mrb_sym sym;
+  symbol_name sname;
   char *p;
 
   for (i = 0; i < mrb->symidx; i++) {
-    if (memcmp(mrb->name2sym_array[i], name, len) == 0) {
+    sname = mrb->name2sym_array[i];
+    if ((sname.len == len) && (memcmp(sname.name, name, len) == 0)) {
       return i+1;
     }
   }
@@ -40,7 +36,9 @@ mrb_intern2(mrb_state *mrb, const char *name, int len)
   p = mrb_malloc(mrb, len+1);
   memcpy(p, name, len);
   p[len] = 0;
-  mrb->name2sym_array[sym-1] = (const char*)p;
+  sname.name = (const char*)p;
+  sname.len = len;
+  mrb->name2sym_array[sym-1] = sname;
 
   // 
   return sym;
@@ -61,15 +59,15 @@ mrb_intern_str(mrb_state *mrb, mrb_value str)
 const char*
 mrb_sym2name_len(mrb_state *mrb, mrb_sym sym, int *lenp)
 {
-  const char* name;
+  symbol_name sname;
 
   if (sym > mrb->symidx) {
     *lenp = 0;
     return NULL;	/* missing */
   }
-  name = mrb->name2sym_array[sym-1];
-  *lenp = strlen(name);
-  return name;
+  sname = mrb->name2sym_array[sym-1];
+  *lenp = sname.len;
+  return sname.name;
 }
 
 void
@@ -77,7 +75,7 @@ mrb_free_symtbls(mrb_state *mrb)
 {
   mrb_sym i;
   for (i=0; i < mrb->symidx-1; i++) {
-    mrb_free(mrb, (char*)mrb->name2sym_array[i]);
+    mrb_free(mrb, (char*)mrb->name2sym_array[i].name);
   }
   mrb->symidx = 0;
 }
