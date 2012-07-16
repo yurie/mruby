@@ -11,6 +11,7 @@
 extern "C" {
 #endif
 
+
 #define MRUBY_OBJECT_HEADER \
   enum mrb_vtype tt:8; \
   unsigned int color:3;\
@@ -44,7 +45,7 @@ struct RBasic {
 
 struct RObject {
   MRUBY_OBJECT_HEADER;
-  struct kh_iv *iv;
+  mrb_seglist iv;
 };
 
 #define mrb_obj_ptr(v)    ((struct RObject*)((v).value.p))

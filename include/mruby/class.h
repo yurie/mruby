@@ -13,7 +13,7 @@ extern "C" {
 
 struct RClass {
   MRUBY_OBJECT_HEADER;
-  struct kh_iv *iv;
+  mrb_seglist *iv;
   struct kh_mt *mt;
   struct RClass *super;
 };
