@@ -14,8 +14,9 @@
 #include "mruby/variable.h"
 #include "mruby/array.h"
 #include "error.h"
+#include "mruby/seglist.h"
 
-KHASH_DEFINE(iv, mrb_sym, mrb_value,     1, kh_int_hash_func, kh_int_hash_equal);
+
 KHASH_DEFINE(mt, mrb_sym, struct RProc*, 1, kh_int_hash_func, kh_int_hash_equal);
 
 typedef struct fc_result {
@@ -69,21 +70,19 @@ static mrb_sym
 class_sym(mrb_state *mrb, struct RClass *c, struct RClass *outer)
 {
   mrb_value name;
+  mrb_seglist *iv;
+  mrb_sym sym;
 
   name = mrb_obj_iv_get(mrb, (struct RObject*)c, mrb_intern(mrb, "__classid__"));
   if (mrb_nil_p(name)) {
-    khash_t(iv)* h;
-    khiter_t k;
-    mrb_value v;
+//	  mrb_seglist *iv;
+//    mrb_value v;
 
     if (!outer) outer = mrb->object_class;
-    h = outer->iv;
-    for (k = kh_begin(h); k != kh_end(h); k++) {
-      if (!kh_exist(h,k)) continue;
-      v = kh_value(h,k);
-      if (mrb_type(v) == c->tt && mrb_class_ptr(v) == c) {
-        return kh_key(h,k);
-      }
+    iv = outer->iv;
+    sym = seglist_get_key_by_class_val(mrb, iv, c);
+    if (sym) {
+    	return sym;
     }
   }
   return SYM2ID(name);

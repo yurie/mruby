@@ -11,6 +11,8 @@
 #include "mruby/class.h"
 #include "mruby/numeric.h"
 #include "mruby/seglist.h"
+#include "mruby/object.h"
+
 
 int
 mrb_obj_eq(mrb_state *mrb, mrb_value v1, mrb_value v2)

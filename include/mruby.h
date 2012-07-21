@@ -83,7 +83,7 @@ typedef struct mrb_value {
 #define FIXNUM_P(o)   ((o).tt == MRB_TT_FIXNUM)
 #define mrb_undef_p(o) ((o).tt == MRB_TT_UNDEF)
 
-#include "mruby/object.h"
+ #include "mruby/object.h"
 
 #define IMMEDIATE_P(x) (mrb_type(x) <= MRB_TT_FLOAT)
 #define SPECIAL_CONST_P(x) IMMEDIATE_P(x)
@@ -238,7 +238,7 @@ typedef struct mrb_state {
   int esize;
 
   struct RObject *exc;
-  struct kh_iv *globals;
+  struct mrb_seglist *globals;
 
   struct mrb_irep **irep;
   size_t irep_len, irep_capa;

@@ -6,7 +6,6 @@
 
 #include "mruby.h"
 #include "mruby/class.h"
-#include "mruby/khash.h"
 #include "mruby/variable.h"
 #include "error.h"
 #include "mruby/array.h"
@@ -17,14 +16,10 @@
 #endif
 
 static void
-mark_tbl(mrb_state *mrb, struct kh_iv *h)
+mark_tbl(mrb_state *mrb, mrb_seglist *iv)
 {
-  khiter_t k;
-
-  if (!h) return;
-  for (k = kh_begin(h); k != kh_end(h); k++)
-    if (kh_exist(h, k))
-      mrb_gc_mark_value(mrb, kh_value(h, k));
+  if (!iv) return;
+  seglist_gc_mark_value(mrb, iv);
 }
 
 void
@@ -36,7 +31,7 @@ mrb_gc_mark_gv(mrb_state *mrb)
 void
 mrb_gc_free_gv(mrb_state *mrb)
 {
-  kh_destroy(iv, mrb->globals);
+	seglist_clear(mrb, mrb->globals);
 }
 
 void
@@ -48,16 +43,16 @@ mrb_gc_mark_iv(mrb_state *mrb, struct RObject *obj)
 size_t
 mrb_gc_mark_iv_size(mrb_state *mrb, struct RObject *obj)
 {
-  struct kh_iv *h = obj->iv;
+  mrb_seglist *iv = obj->iv;
 
-  if (!h) return 0;
-  return kh_size(h);
+  if (!iv) return 0;
+  return seglist_size(mrb, iv);
 }
 
 void
 mrb_gc_free_iv(mrb_state *mrb, struct RObject *obj)
 {
-  kh_destroy(iv, obj->iv);
+	seglist_clear(mrb, obj->iv);
 }
 
 mrb_value
@@ -117,7 +112,7 @@ mrb_iv_get(mrb_state *mrb, mrb_value obj, mrb_sym sym)
 }
 
 static void
-ivset(mrb_state *mrb, mrb_segment *iv, mrb_sym sym, mrb_value v)
+ivset(mrb_state *mrb, mrb_seglist *iv, mrb_sym sym, mrb_value v)
 {
   seglist_put_item(mrb, iv, sym, v);
 }
@@ -146,8 +141,6 @@ mrb_iv_set(mrb_state *mrb, mrb_value obj, mrb_sym sym, mrb_value v) /* mrb_ivar_
 mrb_value
 mrb_iv_remove(mrb_state *mrb, mrb_value obj, mrb_sym sym)
 {
-  mrb_value val;
-
   if (obj_iv_p(obj)) {
     mrb_seglist *iv = mrb_obj_ptr(obj)->iv;
     return seglist_delete_item(mrb, iv, sym);
@@ -189,8 +182,7 @@ mrb_vm_iv_set(mrb_state *mrb, mrb_sym sym, mrb_value v)
 mrb_value
 mrb_obj_instance_variables(mrb_state *mrb, mrb_value self)
 {
-  mrb_value ary;
-  mrb_seglist iv;
+  mrb_seglist *iv;
 
   if (obj_iv_p(self)) {
     iv = ROBJECT_IVPTR(self);
@@ -229,7 +221,7 @@ mrb_vm_cv_set(mrb_state *mrb, mrb_sym sym, mrb_value v)
       iv = c->iv;
       obj = seglist_get_item(mrb, iv, sym);
       if (!mrb_undef_p(obj)) {
-    	  seglist_put_item(mrb, iv, sym, *v);
+    	  seglist_put_item(mrb, iv, sym, v);
     	  return;
       }
     }
@@ -240,7 +232,7 @@ mrb_vm_cv_set(mrb_state *mrb, mrb_sym sym, mrb_value v)
   if (!iv) {
     c->iv = iv = seglist_new(mrb);
   }
-  seglist_put_item(mrb, iv, sym, *v);
+  seglist_put_item(mrb, iv, sym, v);
 }
 
 int
@@ -356,15 +348,13 @@ mrb_gv_get(mrb_state *mrb, mrb_sym sym)
 void
 mrb_gv_set(mrb_state *mrb, mrb_sym sym, mrb_value v)
 {
-  khash_t(iv) *h;
+  mrb_seglist *iv;
 
   if (!mrb->globals) {
-    h = mrb->globals = kh_init(iv, mrb);
+    mrb->globals = seglist_new(mrb);
   }
-  else {
-    h = mrb->globals;
-  }
-  ivset(mrb, h, sym, v);
+  iv = mrb->globals;
+  ivset(mrb, iv, sym, v);
 }
 
 /* 15.3.1.2.4  */
@@ -381,16 +371,12 @@ mrb_value
 mrb_f_global_variables(mrb_state *mrb, mrb_value self)
 {
   char buf[3];
-  khint_t i;
-  struct kh_iv *h = mrb->globals;
-  mrb_value ary = mrb_ary_new(mrb);
+  mrb_seglist *iv = mrb->globals;
+  mrb_value ary;
+  int i;
 
-  if (h) {
-    for (i=0;i < kh_end(h);i++) {
-      if (kh_exist(h, i)) {
-        mrb_ary_push(mrb, ary, mrb_symbol_value(kh_key(h,i)));
-      }
-    }
+  if (iv) {
+	  ary = seglist_get_all_keys(mrb, iv);
   }
   buf[0] = '$';
   buf[2] = 0;
@@ -401,72 +387,28 @@ mrb_f_global_variables(mrb_state *mrb, mrb_value self)
   return ary;
 }
 
-int
-mrb_st_lookup(struct kh_iv *table, mrb_sym id, khiter_t *value)
-{
-  khash_t(iv) *h;
-  khiter_t k;
-
-  if (table) {
-    h = (khash_t(iv)*)table;
-    k = kh_get(iv, h, id);
-    if (k != kh_end(h)) {
-      if (value != 0)  *value = k;//kh_value(h, k);
-      return 1;/* TRUE */
-    }
-    return 0;/* FALSE */
-  }
-  else {
-    return 0;/* FALSE */
-  }
-}
-
-static int
-kiv_lookup(khash_t(iv)* table, mrb_sym key, mrb_value *value)
-{
-  khash_t(iv) *h=table;
-  khiter_t k;
-
-  // you must check(iv==0), before you call this function.
-  //if (!obj->iv) {
-  //  return 0;
-  //}
-  k = kh_get(iv, h, key);
-  if (k != kh_end(h)) {
-    *value = kh_value(h, k);
-    return 1;
-  }
-  return 0;
-}
-
-static int
-mrb_const_defined_0(mrb_state *mrb, struct RClass *klass, mrb_sym id, int exclude, int recurse)
-{
-  mrb_value value;
-  struct RClass * tmp;
-  int mod_retry = 0;
-
-  tmp = klass;
-retry:
-  while (tmp) {
-    if (tmp->iv && kiv_lookup(tmp->iv, id, &value)) {
-      return (int)1/*Qtrue*/;
-    }
-    if (!recurse && (klass != mrb->object_class)) break;
-    tmp = tmp->super;
-  }
-  if (!exclude && !mod_retry && (klass->tt == MRB_TT_MODULE)) {
-    mod_retry = 1;
-    tmp = mrb->object_class;
-    goto retry;
-  }
-  return (int)0/*Qfalse*/;
-}
 
 int
 mrb_const_defined_at(mrb_state *mrb, struct RClass *klass, mrb_sym id)
 {
-  return mrb_const_defined_0(mrb, klass, id, TRUE, FALSE);
+	  struct RClass * c;
+	  mrb_value obj;
+
+	  c = klass;
+
+	  while (c) {
+	    if (c->iv) {
+	    	obj = seglist_get_item(mrb, c->iv, id);
+	    	if (!mrb_undef_p(obj)) {
+	    		return (int)1/*Qtrue*/;
+	    	}
+	    }
+	    if (klass != mrb->object_class) {
+	    	break;
+	    }
+	    c = c->super;
+	  }
+	  return (int)0/*Qfalse*/;
 }
 
 mrb_value

@@ -11,6 +11,8 @@
 #include "mruby/class.h"
 #include "mruby/variable.h"
 #include "error.h"
+#include "mruby/seglist.h"
+#include "mruby/object.h"
 
 typedef enum {
     NOEX_PUBLIC    = 0x00,
@@ -39,29 +41,8 @@ inspect_obj(mrb_state *mrb, mrb_value obj, mrb_value str, int recur)
     mrb_str_cat2(mrb, str, " ...");
   }
   else {
-    khiter_t k;
-    kh_iv_t *h = RCLASS_IV_TBL(obj);
-
-    if (h) {
-      for (k = kh_begin(h); k != kh_end(h); k++) {
-        if (kh_exist(h, k)){
-          mrb_sym id = kh_key(h, k);
-          mrb_value value = kh_value(h, k);
-
-          /* need not to show internal data */
-          if (RSTRING_PTR(str)[0] == '-') { /* first element */
-            RSTRING_PTR(str)[0] = '#';
-            mrb_str_cat2(mrb, str, " ");
-          }
-          else {
-            mrb_str_cat2(mrb, str, ", ");
-          }
-          mrb_str_cat2(mrb, str, mrb_sym2name(mrb, id));
-          mrb_str_cat2(mrb, str, "=");
-          mrb_str_append(mrb, str, mrb_inspect(mrb, value));
-        }
-      }
-    }
+    mrb_seglist *iv = RCLASS_IV_TBL(obj);
+    seglist_inspect_obj(mrb, iv, str);
   }
   mrb_str_cat2(mrb, str, ">");
   RSTRING_PTR(str)[0] = '#';
@@ -365,11 +346,11 @@ init_copy(mrb_state *mrb, mrb_value dest, mrb_value obj)
       case MRB_TT_CLASS:
       case MRB_TT_MODULE:
         if (ROBJECT(dest)->iv) {
-            kh_destroy(iv, ROBJECT(dest)->iv);
+            seglist_clear(mrb, ROBJECT(dest)->iv);
             ROBJECT(dest)->iv = 0;
         }
         if (ROBJECT(obj)->iv) {
-            ROBJECT(dest)->iv = kh_copy(iv, mrb, ROBJECT(obj)->iv);
+            ROBJECT(dest)->iv = seglist_copy(mrb, ROBJECT(obj)->iv);
         }
         break;
 
@@ -637,19 +618,18 @@ obj_is_instance_of(mrb_state *mrb, mrb_value self)
 mrb_value
 mrb_obj_ivar_defined(mrb_state *mrb, mrb_value self)
 {
-  mrb_value arg;
-  khiter_t k;
-  kh_iv_t *h = RCLASS_IV_TBL(self);
+  mrb_value arg, v;
+  mrb_seglist *iv = RCLASS_IV_TBL(self);
   mrb_sym mid;
 
   mrb_get_args(mrb, "o", &arg);
   mid = mrb_to_id(mrb, arg);
 
-  if (h) {
-    k = kh_get(iv, h, mid);
-    if (k != kh_end(h)) {
-      return mrb_true_value();
-    }
+  if (iv) {
+	  v = seglist_get_item(mrb,iv,mid);
+	  if (!mrb_undef_p(v)) {
+		  return mrb_true_value();
+	  }
   }
   return mrb_false_value();
 }
