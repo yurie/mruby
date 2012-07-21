@@ -145,10 +145,14 @@ gettimeofday_time(void)
 
 #define GC_STEP_SIZE 1024
 
+#include <stdio.h>
+#include <stdlib.h>
+
 void*
 mrb_realloc(mrb_state *mrb, void *p, size_t len)
 {
   p = (mrb->allocf)(mrb, p, len);
+  printf("MALLOC %08x %8d\n",p,len);
 
   if (!p && len > 0 && mrb->heaps) {
     mrb_garbage_collect(mrb);
