@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#define MRB_SEGMENT_SIZE 8
+#define MRB_SEGMENT_SIZE 4
 
 typedef struct mrb_segment
 {
@@ -36,7 +36,9 @@ mrb_value seglist_get_item(mrb_state* mrb, mrb_seglist *seglist, mrb_sym sym);
 mrb_seglist *seglist_new(mrb_state* mrb);
 mrb_value seglist_delete_item(mrb_state* mrb, mrb_seglist *seglist, mrb_sym sym);
 mrb_value seglist_get_all_keys(mrb_state *mrb, mrb_seglist *seglist);
+void seglist_get_all_keys_symbol(mrb_state *mrb, mrb_seglist *seglist,mrb_value ary);
 void seglist_gc_mark_value(mrb_state *mrb, mrb_seglist *seglist);
+void seglist_gc_mark_rbasic(mrb_state *mrb, mrb_seglist *seglist);
 size_t seglist_size(mrb_state *mrb, mrb_seglist *seglist);
 mrb_sym seglist_get_key_by_class_val(mrb_state *mrb, mrb_seglist *seglist, struct RClass *c);
 mrb_seglist *seglist_copy(mrb_state *mrb, mrb_seglist *seglist);

@@ -61,7 +61,7 @@ mrb_sym2name_len(mrb_state *mrb, mrb_sym sym, int *lenp)
 {
   symbol_name sname;
 
-  if (sym > mrb->symidx) {
+  if (sym >= mrb->symidx) {
     *lenp = 0;
     return NULL;	/* missing */
   }

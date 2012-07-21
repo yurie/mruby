@@ -17,8 +17,6 @@
 #include "mruby/seglist.h"
 
 
-KHASH_DEFINE(mt, mrb_sym, struct RProc*, 1, kh_int_hash_func, kh_int_hash_equal);
-
 typedef struct fc_result {
     mrb_sym name;
     struct RClass * klass;
@@ -30,33 +28,25 @@ typedef struct fc_result {
 void
 mrb_gc_mark_mt(mrb_state *mrb, struct RClass *c)
 {
-  khiter_t k;
-  khash_t(mt) *h = c->mt;
+  mrb_seglist *mt = c->mt;
 
-  if (!h) return;
-  for (k = kh_begin(h); k != kh_end(h); k++) {
-    if (kh_exist(h, k)){
-      struct RProc *m = kh_value(h, k);
-      if (m) {
-	mrb_gc_mark(mrb, (struct RBasic*)m);
-      }
-    }
-  }
+  if (!mt) return;
+  seglist_gc_mark_rbasic(mrb,mt);
 }
 
 size_t
 mrb_gc_mark_mt_size(mrb_state *mrb, struct RClass *c)
 {
-  khash_t(mt) *h = c->mt;
+	mrb_seglist *mt = c->mt;
 
-  if (!h) return 0;
-  return kh_size(h);
+  if (!mt) return 0;
+  return seglist_size(mrb, mt);
 }
 
 void
 mrb_gc_free_mt(mrb_state *mrb, struct RClass *c)
 {
-  kh_destroy(mt, c->mt);
+	seglist_clear(mrb, c->mt);
 }
 
 void
@@ -114,7 +104,7 @@ mrb_define_module_id(mrb_state *mrb, mrb_sym name)
 {
   struct RClass *m = mrb_module_new(mrb);
 
-  m->mt = kh_init(mt, mrb);
+  m->mt = seglist_new(mrb);
   mrb_obj_iv_set(mrb, (struct RObject*)mrb->object_class,
              name, mrb_obj_value(m));
   mrb_name_class(mrb, m, name);
@@ -290,12 +280,13 @@ mrb_define_module_under(mrb_state *mrb, struct RClass *outer, const char *name)
 void
 mrb_define_method_raw(mrb_state *mrb, struct RClass *c, mrb_sym mid, struct RProc *p)
 {
-  khash_t(mt) *h = c->mt;
-  khiter_t k;
+  mrb_seglist *mt = c->mt;
+  mrb_value v;
 
-  if (!h) h = c->mt = kh_init(mt, mrb);
-  k = kh_put(mt, h, mid);
-  kh_value(h, k) = p;
+  if (!mt) mt = c->mt = seglist_new(mrb);
+  v.value.p = p;
+  v.tt = MRB_TT_PROC;
+  seglist_put_item(mrb, mt, mid, v);
 }
 
 void
@@ -317,12 +308,10 @@ mrb_define_method(mrb_state *mrb, struct RClass *c, const char *name, mrb_func_t
 void
 mrb_define_method_vm(mrb_state *mrb, struct RClass *c, mrb_sym name, mrb_value body)
 {
-  khash_t(mt) *h = c->mt;
-  khiter_t k;
+  mrb_seglist *mt = c->mt;
+  if (!mt) mt = c->mt = seglist_new(mrb);
 
-  if (!h) h = c->mt = kh_init(mt, mrb);
-  k = kh_put(mt, h, name);
-  kh_value(h, k) = mrb_proc_ptr(body);
+  seglist_put_item(mrb, mt, name, body);
 }
 
 static mrb_value
@@ -648,7 +637,7 @@ boot_defclass(mrb_state *mrb, struct RClass *super)
   c = (struct RClass*)mrb_obj_alloc(mrb, MRB_TT_CLASS, mrb->class_class);
   c->super = super ? super : mrb->object_class;
   mrb_field_write_barrier(mrb, (struct RBasic*)c, (struct RBasic*)super);
-  c->mt = kh_init(mt, mrb);
+  c->mt = seglist_new(mrb);
   return c;
 }
 
@@ -795,21 +784,19 @@ mrb_define_module_function(mrb_state *mrb, struct RClass *c, const char *name, m
 struct RProc*
 mrb_method_search_vm(mrb_state *mrb, struct RClass **cp, mrb_sym mid)
 {
-  khiter_t k;
   struct RProc *m;
   struct RClass *c = *cp;
+  mrb_value v;
 
   while (c) {
-    khash_t(mt) *h = c->mt;
+    mrb_seglist *mt = c->mt;
 
-    if (h) {
-      k = kh_get(mt, h, mid);
-      if (k != kh_end(h)) {
-        m = kh_value(h, k);
-        if (!m) break;
+    if (mt) {
+    	v = seglist_get_item(mrb, mt, mid);
+    	if (mrb_undef_p(v)) break;
+    	m = (struct RProc *) v.value.p;
         *cp = c;
         return m;
-      }
     }
     c = c->super;
   }
@@ -1009,17 +996,18 @@ mrb_bob_missing(mrb_state *mrb, mrb_value mod)
 }
 
 int
-mrb_obj_respond_to(struct RClass* c, mrb_sym mid)
+mrb_obj_respond_to(mrb_state *mrb, struct RClass* c, mrb_sym mid)
 {
-  khiter_t k;
+  mrb_value val;
 
   while (c) {
-    khash_t(mt) *h = c->mt;
+    mrb_seglist *mt = c->mt;
 
-    if (h) {
-      k = kh_get(mt, h, mid);
-      if (k != kh_end(h))
-        return 1; /* exist method */
+    if (mt) {
+    	val = seglist_get_item(mrb, mt, mid);
+    	if (!mrb_undef_p(val)) {
+    		return 1; /* exist method */
+    	}
     }
     c = c->super;
   }
@@ -1029,7 +1017,7 @@ mrb_obj_respond_to(struct RClass* c, mrb_sym mid)
 int
 mrb_respond_to(mrb_state *mrb, mrb_value obj, mrb_sym mid)
 {
-  return mrb_obj_respond_to(mrb_class(mrb, obj), mid);
+  return mrb_obj_respond_to(mrb, mrb_class(mrb, obj), mid);
 }
 
 mrb_value
@@ -1135,7 +1123,7 @@ struct RClass *
 mrb_module_new(mrb_state *mrb)
 {
   struct RClass *m = (struct RClass*)mrb_obj_alloc(mrb, MRB_TT_MODULE, mrb->module_class);
-  m->mt = kh_init(mt, mrb);
+  m->mt = seglist_new(mrb);
 
   return m;
 }

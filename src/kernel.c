@@ -319,10 +319,10 @@ mrb_singleton_class_clone(mrb_state *mrb, mrb_value obj)
           clone->iv = klass->iv;
       }
       if (klass->mt) {
-          clone->mt = kh_copy(mt, mrb, klass->mt);
+          clone->mt = seglist_copy(mrb,klass->mt);
       }
       else {
-          clone->mt = kh_init(mt, mrb);
+          clone->mt = seglist_new(mrb);
       }
       clone->tt = MRB_TT_SCLASS;
       return clone;
@@ -746,15 +746,10 @@ mrb_obj_is_kind_of_m(mrb_state *mrb, mrb_value self)
 static void
 method_entry_loop(mrb_state *mrb, struct RClass* klass, mrb_value ary)
 {
-  khint_t i;
+  mrb_seglist *mt = klass->mt;
+  if (!mt) return;
 
-  khash_t(mt) *h = klass->mt;
-  if (!h) return;
-  for (i=0;i<kh_end(h);i++) {
-    if (kh_exist(h, i)) {
-      mrb_ary_push(mrb, ary, mrb_symbol_value(kh_key(h,i)));
-    }
-  }
+  seglist_get_all_keys_symbol(mrb,mt, ary);
 }
 
 static mrb_value

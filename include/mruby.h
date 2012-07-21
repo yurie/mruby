@@ -219,7 +219,7 @@ enum gc_state {
   GC_STATE_SWEEP
 };
 
-#define MRB_N2S_SIZE 1000
+#define MRB_N2S_SIZE 300
 
 typedef struct mrb_state {
   void *jmp;
@@ -311,7 +311,7 @@ struct RClass * mrb_class_obj_get(mrb_state *mrb, const char *name);
 
 mrb_value mrb_obj_dup(mrb_state *mrb, mrb_value obj);
 mrb_value mrb_check_to_integer(mrb_state *mrb, mrb_value val, const char *method);
-int mrb_obj_respond_to(struct RClass* c, mrb_sym mid);
+int mrb_obj_respond_to(mrb_state *mrb, struct RClass* c, mrb_sym mid);
 struct RClass * mrb_define_class_under(mrb_state *mrb, struct RClass *outer, const char *name, struct RClass *super);
 struct RClass * mrb_define_module_under(mrb_state *mrb, struct RClass *outer, const char *name);
 

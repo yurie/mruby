@@ -184,6 +184,29 @@ mrb_value seglist_get_all_keys(mrb_state *mrb, mrb_seglist *seglist)
 
 }
 
+void seglist_get_all_keys_symbol(mrb_state *mrb, mrb_seglist *seglist, mrb_value ary)
+{
+	mrb_segment *segment;
+	// mrb_value ary;
+	int i;
+
+	segment = seglist->rootseg;
+
+	while (segment != NULL) {
+		for (i=0; i<MRB_SEGMENT_SIZE; i++) {
+			mrb_sym seg_key = segment->key[i];
+			mrb_ary_push(mrb, ary, mrb_symbol_value(seg_key));
+
+			// 最後のセグメントでlast_lenよりも後の要素の場合
+			if ((segment->next == NULL) && (i >= seglist->last_len)) {
+				return;
+			}
+		}
+		segment = segment->next;
+	}
+	return;
+}
+
 void seglist_gc_mark_value(mrb_state *mrb, mrb_seglist *seglist)
 {
 	mrb_segment *segment;
@@ -194,6 +217,27 @@ void seglist_gc_mark_value(mrb_state *mrb, mrb_seglist *seglist)
 	while (segment != NULL) {
 		for (i=0; i<MRB_SEGMENT_SIZE; i++) {
 			mrb_gc_mark_value(mrb, segment->val[i]);
+            // 最後のセグメントでlast_lenよりも後の要素の場合
+            if ((segment->next == NULL) && (i >= seglist->last_len)) {
+            	return;
+            }
+		}
+		segment = segment->next;
+	}
+}
+
+void seglist_gc_mark_rbasic(mrb_state *mrb, mrb_seglist *seglist)
+{
+	mrb_segment *segment;
+	int i;
+
+	segment = seglist->rootseg;
+
+	while (segment != NULL) {
+		for (i=0; i<MRB_SEGMENT_SIZE; i++) {
+			mrb_value v = segment->val[i];
+			struct RBasic *p = v.value.p;
+			mrb_gc_mark(mrb, p);
 			// 最後のセグメントでlast_lenよりも後の要素の場合
 			if ((segment->next == NULL) && (i >= seglist->last_len)) {
 				return;
@@ -256,8 +300,6 @@ mrb_seglist *seglist_copy(mrb_state *mrb, mrb_seglist *seglist)
 	mrb_seglist *list2;
 
 	int i;
-	int len;
-	const char *p;
 
 	segment = seglist->rootseg;
 	list2 = seglist_new(mrb);
@@ -284,8 +326,6 @@ mrb_value seglist_inspect_obj(mrb_state *mrb, mrb_seglist *seglist, mrb_value st
 	mrb_segment *segment;
 	// mrb_value ary;
 	int i;
-	int len;
-	const char *p;
 
 	segment = seglist->rootseg;
 

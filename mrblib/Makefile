@@ -44,7 +44,7 @@ MRBC = ../bin/mrbc.exe
 else
 MRBC = ../bin/mrbc
 endif
-
+MRBC_CMD = /Users/yuri/git/mruby/bin/mrbc
 
 ##############################
 # generic build targets, rules
@@ -63,7 +63,7 @@ $(MLIB) : $(CLIB)
 
 # Compile C source from merged mruby source
 $(CLIB) : $(RLIB) $(MRBC)
-	$(MRBC) -Bmrblib_irep -o$(DLIB) $(RLIB); $(CAT) init_$(TARGET).c $(DLIB) > $@
+	$(MRBC_CMD) -Bmrblib_irep -o$(DLIB) $(RLIB); $(CAT) init_$(TARGET).c $(DLIB) > $@
 
 $(MRBC) : ../src/opcode.h ../src/codegen.c ../src/parse.y
 	$(MAKE) -C ../tools/mrbc $(MAKE_FLAGS)

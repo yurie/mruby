@@ -151,8 +151,10 @@ gettimeofday_time(void)
 void*
 mrb_realloc(mrb_state *mrb, void *p, size_t len)
 {
+	static size_t mem_sum = 0;
   p = (mrb->allocf)(mrb, p, len);
-  printf("MALLOC %08x %8d\n",p,len);
+  mem_sum += len;
+  printf("MALLOC %08x %8d %8d\n",p,len,mem_sum);
 
   if (!p && len > 0 && mrb->heaps) {
     mrb_garbage_collect(mrb);
@@ -190,7 +192,8 @@ mrb_free(mrb_state *mrb, void *p)
   return (mrb->allocf)(mrb, p, 0);
 }
 
-#define HEAP_PAGE_SIZE 1024
+// #define HEAP_PAGE_SIZE 1024
+#define HEAP_PAGE_SIZE 128
 
 struct heap_page {
   struct RBasic *freelist;

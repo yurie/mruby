@@ -292,8 +292,12 @@ const_get(mrb_state *mrb, struct RClass *base, mrb_sym sym)
     c = base = mrb->object_class;
     goto L_RETRY;
   }
+  /*
   mrb_raise(mrb, E_NAME_ERROR, "uninitialized constant %s",
             mrb_sym2name(mrb, sym));
+  */
+  mrb_raise(mrb, E_NAME_ERROR, "uninitialized constant %d",
+            sym);
   /* not reached */
   return mrb_nil_value();
 }

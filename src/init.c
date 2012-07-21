@@ -44,14 +44,14 @@ mrb_init_core(mrb_state *mrb)
 
   mrb_init_symbol(mrb);
   mrb_init_exception(mrb);
-  mrb_init_proc(mrb);
-  mrb_init_string(mrb);
+//  mrb_init_proc(mrb);
+//  mrb_init_string(mrb);
   mrb_init_array(mrb);
-  mrb_init_hash(mrb);
+//  mrb_init_hash(mrb);
   mrb_init_numeric(mrb);
-  mrb_init_range(mrb);
+//  mrb_init_range(mrb);
 #ifdef ENABLE_STRUCT
-  mrb_init_struct(mrb);
+//  mrb_init_struct(mrb);
 #endif
   mrb_init_gc(mrb);
 #ifdef ENABLE_REGEXP
@@ -61,10 +61,10 @@ mrb_init_core(mrb_state *mrb)
   mrb_init_print(mrb);
 #endif
 #ifdef ENABLE_TIME
-  mrb_init_time(mrb);
+//  mrb_init_time(mrb);
 #endif
 #ifdef ENABLE_MATH
-  mrb_init_math(mrb);
+//  mrb_init_math(mrb);
 #endif
 
   mrb_init_mrblib(mrb);
