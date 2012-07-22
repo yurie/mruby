@@ -792,11 +792,13 @@ mrb_method_search_vm(mrb_state *mrb, struct RClass **cp, mrb_sym mid)
     mrb_seglist *mt = c->mt;
 
     if (mt) {
-    	v = seglist_get_item(mrb, mt, mid);
-    	if (mrb_undef_p(v)) break;
-    	m = (struct RProc *) v.value.p;
-        *cp = c;
-        return m;
+        v = seglist_get_item(mrb, mt, mid);
+        if (!mrb_undef_p(v)) {
+            if (v.tt != MRB_TT_PROC) break;
+            m = (struct RProc *) v.value.p;
+            *cp = c;
+            return m;
+        }
     }
     c = c->super;
   }
