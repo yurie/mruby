@@ -44,7 +44,7 @@ MRBC = ../bin/mrbc.exe
 else
 MRBC = ../bin/mrbc
 endif
-MRBC_CMD = /Users/yuri/git/mruby/bin/mrbc
+MRBC_CMD = $(HOME)/git/mruby/bin/mrbc
 
 ##############################
 # generic build targets, rules
