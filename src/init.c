@@ -45,7 +45,7 @@ mrb_init_core(mrb_state *mrb)
   mrb_init_symbol(mrb);
   mrb_init_exception(mrb);
 //  mrb_init_proc(mrb);
-//  mrb_init_string(mrb);
+  mrb_init_string(mrb);
   mrb_init_array(mrb);
 //  mrb_init_hash(mrb);
   mrb_init_numeric(mrb);
