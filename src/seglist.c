@@ -334,6 +334,11 @@ mrb_value seglist_inspect_obj(mrb_state *mrb, mrb_seglist *seglist, mrb_value st
       mrb_sym id = segment->key[i];
       mrb_value value = segment->val[i];
 
+      // 最後のセグメントでlast_lenよりも後の要素の場合
+      if ((segment->next == NULL) && (i >= seglist->last_len)) {
+        return str;
+      }
+
       /* need not to show internal data */
       if (RSTRING_PTR(str)[0] == '-') { /* first element */
         RSTRING_PTR(str)[0] = '#';
@@ -346,6 +351,7 @@ mrb_value seglist_inspect_obj(mrb_state *mrb, mrb_seglist *seglist, mrb_value st
       mrb_str_cat2(mrb, str, "=");
       mrb_str_append(mrb, str, mrb_inspect(mrb, value));
     }
+    segment = segment->next;
   }
 
   return str;

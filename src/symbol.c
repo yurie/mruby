@@ -61,7 +61,7 @@ mrb_sym2name_len(mrb_state *mrb, mrb_sym sym, int *lenp)
 {
   symbol_name sname;
 
-  if (sym >= mrb->symidx) {
+  if (sym > mrb->symidx) {
     *lenp = 0;
     return NULL;	/* missing */
   }
@@ -74,7 +74,7 @@ void
 mrb_free_symtbls(mrb_state *mrb)
 {
   mrb_sym i;
-  for (i=0; i < mrb->symidx-1; i++) {
+  for (i=0; i < mrb->symidx; i++) {
     mrb_free(mrb, (char*)mrb->name2sym_array[i].name);
   }
   mrb->symidx = 0;
