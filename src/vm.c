@@ -21,8 +21,10 @@
 #include <string.h>
 #include <setjmp.h>
 
-#define STACK_INIT_SIZE 128
-#define CALLINFO_INIT_SIZE 32
+// #define STACK_INIT_SIZE 128
+#define STACK_INIT_SIZE 32
+//#define CALLINFO_INIT_SIZE 32
+#define CALLINFO_INIT_SIZE 16
 
 static void
 stack_init(mrb_state *mrb)
