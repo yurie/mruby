@@ -62,11 +62,11 @@ $(MLIB) : $(CLIB)
 	$(CC) $(ALL_CFLAGS) -MMD $(INCLUDES) -c $(CLIB) -o $(MLIB)
 
 # Compile C source from merged mruby source
-$(CLIB) : $(RLIB) $(MRBC)
+$(CLIB) : $(RLIB)
 	$(MRBC_CMD) -Bmrblib_irep -o$(DLIB) $(RLIB); $(CAT) init_$(TARGET).c $(DLIB) > $@
 
-$(MRBC) : ../src/opcode.h ../src/codegen.c ../src/parse.y
-	$(MAKE) -C ../tools/mrbc $(MAKE_FLAGS)
+#$(MRBC) : ../src/opcode.h ../src/codegen.c ../src/parse.y
+#	$(MAKE) -C ../tools/mrbc $(MAKE_FLAGS)
 
 # merge mruby sources
 $(RLIB) : $(MRBS)
