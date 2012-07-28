@@ -13,7 +13,7 @@ ifeq ($(strip $(COMPILE_MODE)),)
 endif
 
 ifeq ($(COMPILE_MODE),debug)
-  CFLAGS = -g -Os
+  CFLAGS = -g
 else ifeq ($(COMPILE_MODE),release)
   CFLAGS = -O3
 else ifeq ($(COMPILE_MODE),small)
