@@ -16,6 +16,20 @@ OBJ1 := $(patsubst %.c,%.o,$(filter-out $(EXCEPT1),$(wildcard $(BASEDIR)/*.c)))
 #OBJ3 := $(patsubst %.c,%.o,$(wildcard $(BASEDIR)/ext/enc/*.c))
 OBJS := $(OBJ1) $(OBJ2) $(OBJ3)
 
+MRUBYVM := ../lib/libmrubyvm.a
+EXCEPTVM := $(YC) \
+  $(BASEDIR)/cdump.c \
+  $(BASEDIR)/codegen.c \
+  $(BASEDIR)/re.c \
+  $(BASEDIR)/dump.c \
+  $(BASEDIR)/regcomp.c \
+  $(BASEDIR)/regenc.c \
+  $(BASEDIR)/regerror.c \
+  $(BASEDIR)/regexec.c \
+  $(BASEDIR)/regparse.c
+
+OBJVM := $(patsubst %.c,%.o,$(filter-out $(EXCEPTVM),$(wildcard $(BASEDIR)/*.c)))
+
 # libraries, includes
 INCLUDES = -I$(BASEDIR) -I$(BASEDIR)/../include
 
@@ -39,13 +53,19 @@ ALL_CFLAGS = -Wall -Werror-implicit-function-declaration $(CFLAGS)
 # generic build targets, rules
 
 .PHONY : all
-all : $(TARGET)
+all : $(TARGET) mrubyvm
 
 # executable constructed using linker from object files
 $(TARGET) : $(OBJS) $(OBJY)
 	$(AR) r $@ $(OBJS) $(OBJY)
 
 -include $(OBJS:.o=.d) $(OBJY:.o=.d)
+
+mrubyvm : $(MRUBYVM)
+
+$(MRUBYVM) : $(OBJVM)
+	$(AR) r $@ $(OBJVM)
+
 
 # objects compiled from source
 $(OBJS) : %.o : %.c

@@ -46,6 +46,7 @@ all :
 	@$(MAKE) -C mrblib $(MAKE_FLAGS)
 	@$(MAKE) -C tools/mruby $(MAKE_FLAGS)
 	@$(MAKE) -C tools/mirb $(MAKE_FLAGS)
+	@$(MAKE) -C samples $(MAKE_FLAGS)
 
 # mruby test
 .PHONY : test
@@ -59,6 +60,7 @@ clean :
 	@$(MAKE) clean -C tools/mruby $(MAKE_FLAGS)
 	@$(MAKE) clean -C tools/mirb $(MAKE_FLAGS)
 	@$(MAKE) clean -C test $(MAKE_FLAGS)
+	@$(MAKE) clean -C samples $(MAKE_FLAGS)
 
 # display help for build configuration and interesting targets
 .PHONY : showconfig
