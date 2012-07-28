@@ -11,14 +11,14 @@
 
 /* configuration options: */
 /* add -DMRB_USE_FLOAT to use float instead of double for floating point numbers */
-//#define MRB_USE_FLOAT
+#define MRB_USE_FLOAT
 
 /* -DDISABLE_XXXX to change to drop the feature */
 #define DISABLE_REGEXP	        /* regular expression classes */
 //#define DISABLE_SPRINTF	/* Kernel.sprintf method */
-//#define DISABLE_MATH		/* Math functions */
+#define DISABLE_MATH		/* Math functions */
 //#define DISABLE_TIME		/* Time class */
-//#define DISABLE_STRUCT	/* Struct class */
+#define DISABLE_STRUCT	/* Struct class */
 //#define DISABLE_STDIO		/* use of stdio */
 
 #undef  HAVE_UNISTD_H /* WINDOWS */
@@ -33,7 +33,8 @@ typedef double mrb_float;
 #define readfloat(p) (mrb_float)strtod((p),NULL)
 
 typedef int mrb_int;
-typedef intptr_t mrb_sym;
+//typedef intptr_t mrb_sym;
+typedef int16_t mrb_sym;
 
 /* define ENABLE_XXXX from DISABLE_XXX */
 #ifndef DISABLE_REGEXP

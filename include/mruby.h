@@ -219,7 +219,7 @@ enum gc_state {
   GC_STATE_SWEEP
 };
 
-#define MRB_N2S_SIZE 1000
+#define MRB_N2S_SIZE 300
 
 typedef struct mrb_state {
   void *jmp;

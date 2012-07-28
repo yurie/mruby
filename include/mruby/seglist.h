@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#define MRB_SEGMENT_SIZE 4
+#define MRB_SEGMENT_SIZE 3
 
 typedef struct mrb_segment
 {
