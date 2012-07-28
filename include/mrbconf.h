@@ -15,9 +15,9 @@
 
 /* -DDISABLE_XXXX to change to drop the feature */
 #define DISABLE_REGEXP	        /* regular expression classes */
-//#define DISABLE_SPRINTF	/* Kernel.sprintf method */
+#define DISABLE_SPRINTF	/* Kernel.sprintf method */
 #define DISABLE_MATH		/* Math functions */
-//#define DISABLE_TIME		/* Time class */
+#define DISABLE_TIME		/* Time class */
 #define DISABLE_STRUCT	/* Struct class */
 //#define DISABLE_STDIO		/* use of stdio */
 
