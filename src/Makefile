@@ -86,6 +86,6 @@ $(LDEF) : $(KWD)
 .PHONY : clean #cleandep
 clean :
 	@echo "make: removing targets, objects and depend files of `pwd`"
-	-$(RM_F) $(TARGET) $(OBJS) $(OBJY) $(YC)
+	-$(RM_F) $(TARGET) $(OBJS) $(OBJY) $(YC) $(MRUBYVM)
 	-$(RM_F) $(OBJS:.o=.d) $(OBJY:.o=.d)
 	-$(RM_F) $(patsubst %.c,%.o,$(EXCEPT1)) $(patsubst %.c,%.d,$(EXCEPT1))
