@@ -66,6 +66,8 @@ endif
 .PHONY : test
 all : $(EXE)
 
+obj : $(OBJS)
+
 # executable constructed using linker from object files
 $(EXE) : $(OBJS) $(LIBR)
 	$(LL) -o $@ $(CFLAGS) $(OBJS) $(LIBR) $(LIBS)
@@ -77,7 +79,7 @@ $(OBJS) : %.o : %.c
 	$(CC) $(ALL_CFLAGS) -MMD $(INCLUDES) -c $< -o $@
 
 # Compile C source from merged mruby source
-$(CLIB) : $(INIT)
+$(CLIB) : $(INIT) $(RLIB)
 	$(MRBC_CMD) -Chello_irep -o$(DLIB) $(RLIB); $(CAT) $(INIT) $(DLIB) > $@
 
 # clean up
