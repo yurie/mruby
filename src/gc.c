@@ -157,13 +157,14 @@ mrb_realloc(mrb_state *mrb, void *p, size_t len)
 {
 	static size_t mem_sum = 0;
   p = (mrb->allocf)(mrb, p, len);
+  /***
   mem_sum += len;
 #ifdef USE_SYSLOG
   syslog(4, "MALLOC %08x %8d %8d\n",p,len,mem_sum);
 #else
   printf("MALLOC %08x %8d %8d\n",p,len,mem_sum);
-#endif /* USE_SYSLOG  */
-
+#endif
+  ***/
   if (!p && len > 0 && mrb->heaps) {
     mrb_garbage_collect(mrb);
     p = (mrb->allocf)(mrb, p, len);
