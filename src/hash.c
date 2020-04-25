@@ -665,7 +665,7 @@ mrb_hash_init_copy(mrb_state *mrb, mrb_value self)
   vret = mrb_obj_value(copy);
   ifnone = RHASH_IFNONE(self);
   if (!mrb_nil_p(ifnone)) {
-      mrb_iv_set(mrb, vret, mrb_intern_lit(mrb, "ifnone"), ifnone);
+    mrb_iv_set(mrb, vret, MRB_SYM(ifnone), ifnone);
   }
   return vret;
 }
@@ -711,7 +711,7 @@ mrb_hash_get(mrb_state *mrb, mrb_value hash, mrb_value key)
     return val;
   }
 
-  mid = mrb_intern_lit(mrb, "default");
+  mid = MRB_SYM(default);
   if (mrb_func_basic_p(mrb, hash, mid, mrb_hash_default)) {
     return hash_default(mrb, hash, key);
   }
@@ -806,7 +806,7 @@ mrb_hash_init(mrb_state *mrb, mrb_value hash)
   }
   if (!mrb_nil_p(ifnone)) {
     RHASH(hash)->flags |= MRB_HASH_DEFAULT;
-    mrb_iv_set(mrb, hash, mrb_intern_lit(mrb, "ifnone"), ifnone);
+    mrb_iv_set(mrb, hash, MRB_SYM(ifnone), ifnone);
   }
   return hash;
 }
@@ -917,7 +917,7 @@ mrb_hash_set_default(mrb_state *mrb, mrb_value hash)
 
   mrb_get_args(mrb, "o", &ifnone);
   mrb_hash_modify(mrb, hash);
-  mrb_iv_set(mrb, hash, mrb_intern_lit(mrb, "ifnone"), ifnone);
+  mrb_iv_set(mrb, hash, MRB_SYM(ifnone), ifnone);
   RHASH(hash)->flags &= ~MRB_HASH_PROC_DEFAULT;
   if (!mrb_nil_p(ifnone)) {
     RHASH(hash)->flags |= MRB_HASH_DEFAULT;
@@ -973,7 +973,7 @@ mrb_hash_set_default_proc(mrb_state *mrb, mrb_value hash)
 
   mrb_get_args(mrb, "o", &ifnone);
   mrb_hash_modify(mrb, hash);
-  mrb_iv_set(mrb, hash, mrb_intern_lit(mrb, "ifnone"), ifnone);
+  mrb_iv_set(mrb, hash, MRB_SYM(ifnone), ifnone);
   if (!mrb_nil_p(ifnone)) {
     RHASH(hash)->flags |= MRB_HASH_PROC_DEFAULT;
     RHASH(hash)->flags |= MRB_HASH_DEFAULT;
