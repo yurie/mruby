@@ -47,5 +47,4 @@ install:
 build_script:
   - set YACC=.\win_flex_bison\win_bison.exe
   - set MRUBY_TARGET=appveyor
-  - rake gensym
   - rake -E $stdout.sync=true test
