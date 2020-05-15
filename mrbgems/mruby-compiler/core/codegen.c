@@ -1713,7 +1713,7 @@ codegen(codegen_scope *s, node *tree, int val)
               genop_3(s, OP_SEND, cursp(), new_sym(s, MRB_SYM(__case_eqq)), 1);
             }
             else {
-              genop_3(s, OP_SEND, cursp(), new_sym(s, mrb_intern_lit(s->mrb, "===")), 1);
+              genop_3(s, OP_SEND, cursp(), new_sym(s, MRB_OPSYM(eqq)), 1);
             }
           }
           else {
@@ -2528,7 +2528,7 @@ codegen(codegen_scope *s, node *tree, int val)
 
       default:
         if (val) {
-          int sym = new_sym(s, mrb_intern_lit(s->mrb, "-@"));
+          int sym = new_sym(s, MRB_OPSYM(minus));
           codegen(s, tree, VAL);
           pop();
           genop_3(s, OP_SEND, cursp(), sym, 0);
@@ -2620,7 +2620,7 @@ codegen(codegen_scope *s, node *tree, int val)
       }
       push();                   /* for block */
       pop_n(3);
-      sym = new_sym(s, mrb_intern_lit(s->mrb, "`"));
+      sym = new_sym(s, MRB_OPSYM(tick)); /* ` */
       genop_3(s, OP_SEND, cursp(), sym, 1);
       if (val) push();
       mrb_gc_arena_restore(s->mrb, ai);
@@ -2640,7 +2640,7 @@ codegen(codegen_scope *s, node *tree, int val)
       genop_2(s, OP_STRING, cursp(), off);
       push(); push();
       pop_n(3);
-      sym = new_sym(s, mrb_intern_lit(s->mrb, "`"));
+      sym = new_sym(s, MRB_OPSYM(tick)); /* ` */
       genop_3(s, OP_SEND, cursp(), sym, 1);
       if (val) push();
       mrb_gc_arena_restore(s->mrb, ai);

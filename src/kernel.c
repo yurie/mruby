@@ -746,7 +746,7 @@ mrb_obj_ceqq(mrb_state *mrb, mrb_value self)
 {
   mrb_value v;
   mrb_int i, len;
-  mrb_sym eqq = mrb_intern_lit(mrb, "===");
+  mrb_sym eqq = MRB_OPSYM(eqq);
   mrb_value ary = mrb_ary_splat(mrb, self);
 
   mrb_get_args(mrb, "o", &v);
