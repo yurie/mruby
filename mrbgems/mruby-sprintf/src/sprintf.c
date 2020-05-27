@@ -763,7 +763,7 @@ retry:
             tmp = mrb_str_new(mrb, buf, 1);
           }
           else {
-            tmp = mrb_funcall(mrb, val, "chr", 0);
+            tmp = mrb_funcall_id(mrb, val, MRB_SYM(chr), 0);
             mrb_check_type(mrb, tmp, MRB_TT_STRING);
           }
 #endif
@@ -842,7 +842,7 @@ retry:
       case 'B':
       case 'u': {
         mrb_value val = GETARG();
-        char nbuf[68], *s;
+        char nbuf[69], *s;
         const char *prefix = NULL;
         int sign = 0, dots = 0;
         char sc = 0;
@@ -927,7 +927,7 @@ retry:
           else {
             val = mrb_fixnum_to_str(mrb, mrb_fixnum_value(v), base);
           }
-          strncpy(++s, RSTRING_PTR(val), sizeof(nbuf)-1);
+          strncpy(++s, RSTRING_PTR(val), sizeof(nbuf)-2);
           if (v < 0) {
             char d;
 
