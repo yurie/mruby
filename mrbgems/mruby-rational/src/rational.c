@@ -152,7 +152,7 @@ rational_to_i(mrb_state *mrb, mrb_value self)
 {
   struct mrb_rational *p = rational_ptr(mrb, self);
   if (p->denominator == 0) {
-    mrb_raise(mrb, mrb_exc_get(mrb, "StandardError"), "divided by 0");
+    mrb_raise(mrb, mrb->eStandardError, "divided by 0");
   }
   return mrb_fixnum_value(p->numerator / p->denominator);
 }
