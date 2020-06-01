@@ -37,7 +37,7 @@ unbound_method_bind(mrb_state *mrb, mrb_value self)
 
   mrb_get_args(mrb, "o", &recv);
   bind_check(mrb, recv, owner);
-  me = method_object_alloc(mrb, mrb_class_get(mrb, "Method"));
+  me = method_object_alloc(mrb, mrb_class_get_id(mrb, MRB_SYM(Method)));
   mrb_obj_iv_set(mrb, me, MRB_SYM(_owner), owner);
   mrb_obj_iv_set(mrb, me, MRB_SYM(_recv), recv);
   mrb_obj_iv_set(mrb, me, MRB_SYM(_name), name);

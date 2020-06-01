@@ -73,7 +73,7 @@ rational_denominator(mrb_state *mrb, mrb_value self)
 static mrb_value
 rational_new(mrb_state *mrb, mrb_int numerator, mrb_int denominator)
 {
-  struct RClass *c = mrb_class_get(mrb, "Rational");
+  struct RClass *c = mrb_class_get_id(mrb, MRB_SYM(Rational));
   struct mrb_rational *p;
   struct RBasic *rat = rational_alloc(mrb, c, &p);
   p->numerator = numerator;
@@ -183,7 +183,7 @@ void mrb_mruby_rational_gem_init(mrb_state *mrb)
 {
   struct RClass *rat;
 
-  rat = mrb_define_class(mrb, "Rational", mrb_class_get(mrb, "Numeric"));
+  rat = mrb_define_class_id(mrb, MRB_SYM(Rational), mrb_class_get_id(mrb, MRB_SYM(Numeric)));
 #ifdef RATIONAL_USE_ISTRUCT
   MRB_SET_INSTANCE_TT(rat, MRB_TT_ISTRUCT);
   mrb_assert(sizeof(struct mrb_rational) < ISTRUCT_DATA_SIZE);
