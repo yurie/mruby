@@ -1293,28 +1293,37 @@ static const mrb_code each_iseq[] = {
   OP_RETURN, 0x0             /* OP_RETURN    R3 */
 };
 
+static const mrb_sym each_syms[] = {
+  MRB_SYM(each),
+  MRB_SYM(to_enum),
+  MRB_QSYM(aref),
+  MRB_SYM(call),
+  MRB_SYM(length),
+};
+
+static const mrb_irep each_irep = {
+  .nlocals = 3,
+  .nregs = 7,
+  .flags = MRB_ISEQ_NO_FREE|MRB_IREP_NO_FREE,
+  .iseq = each_iseq,
+  .ilen = sizeof(each_iseq),
+  .syms = each_syms,
+  .slen = sizeof(each_syms),
+  .pool = NULL,
+  .plen = 0,
+  .reps = NULL,
+  .rlen = 1,
+  .lv = NULL,
+  .refcnt = 0,
+};
+
 static void
 init_ary_each(mrb_state *mrb, struct RClass *ary)
 {
   struct RProc *p;
   mrb_method_t m;
-  mrb_irep *each_irep = (mrb_irep*)mrb_malloc(mrb, sizeof(mrb_irep));
-  static const mrb_irep mrb_irep_zero = { 0 };
 
-  *each_irep = mrb_irep_zero;
-  each_irep->syms = (mrb_sym*)mrb_malloc(mrb, sizeof(mrb_sym)*5);
-  each_irep->syms[0] = MRB_SYM(each);
-  each_irep->syms[1] = MRB_SYM(to_enum);
-  each_irep->syms[2] = MRB_QSYM(aref);
-  each_irep->syms[3] = MRB_SYM(call);
-  each_irep->syms[4] = MRB_SYM(length);
-  each_irep->slen = 5;
-  each_irep->flags = MRB_ISEQ_NO_FREE;
-  each_irep->iseq = each_iseq;
-  each_irep->ilen = sizeof(each_iseq);
-  each_irep->nregs = 7;
-  each_irep->nlocals = 3;
-  p = mrb_proc_new(mrb, each_irep);
+  p = mrb_proc_new(mrb, &each_irep);
   p->flags |= MRB_PROC_SCOPE | MRB_PROC_STRICT;
   MRB_METHOD_FROM_PROC(m, p);
   mrb_define_method_raw(mrb, ary, MRB_SYM(each), m);
