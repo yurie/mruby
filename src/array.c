@@ -1304,16 +1304,17 @@ static const mrb_sym each_syms[] = {
 static const mrb_irep each_irep = {
   .nlocals = 3,
   .nregs = 7,
-  .flags = MRB_ISEQ_NO_FREE|MRB_IREP_NO_FREE,
+  .flags = MRB_ISEQ_NO_FREE | MRB_IREP_NO_FREE,
   .iseq = each_iseq,
-  .ilen = sizeof(each_iseq),
-  .syms = each_syms,
-  .slen = sizeof(each_syms),
   .pool = NULL,
-  .plen = 0,
+  .syms = each_syms,
   .reps = NULL,
-  .rlen = 1,
   .lv = NULL,
+  .debug_info = NULL,
+  .ilen = sizeof(each_iseq),
+  .plen = 0,
+  .slen = sizeof(each_syms),
+  .rlen = 1,
   .refcnt = 0,
 };
 
