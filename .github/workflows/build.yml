@@ -100,7 +100,7 @@ jobs:
       shell: cmd
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        rake -E "STDOUT.sync=true" -m -j4 test
+        rake -E "STDOUT.sync=true" test
       env:
         MRUBY_CONFIG: appveyor_config.rb
         YACC: win_bison
