@@ -778,7 +778,9 @@ mrb_win32_basicsocket_close(mrb_state *mrb, mrb_value self)
   return mrb_nil_value();
 }
 
+#ifndef E_EOF_ERROR
 #define E_EOF_ERROR                (mrb_class_get_id(mrb, MRB_SYM(EOFError))
+#endif
 static mrb_value
 mrb_win32_basicsocket_sysread(mrb_state *mrb, mrb_value self)
 {
