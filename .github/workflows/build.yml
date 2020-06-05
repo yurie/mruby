@@ -12,7 +12,7 @@ jobs:
     - name: build and test
       run: rake -m -j4 all test
       env:
-        MRUBY_CONFIG: travis_config.rb
+        MRUBY_TARGET: travis
 
   Ubuntu-1804-gcc:
     runs-on: ubuntu-18.04
@@ -23,7 +23,7 @@ jobs:
     - name: build and test
       run: rake -m -j4 all test
       env:
-        MRUBY_CONFIG: travis_config.rb
+        MRUBY_TARGET: travis
         CC: gcc
         CXX: g++
 
@@ -36,7 +36,7 @@ jobs:
     - name: build and test
       run: rake -m -j4 all test
       env:
-        MRUBY_CONFIG: travis_config.rb
+        MRUBY_TARGET: travis
         CC: clang
         CXX: clang++
 
@@ -49,7 +49,7 @@ jobs:
     - name: build and test
       run: rake -m -j4 all test
       env:
-        MRUBY_CONFIG: travis_config.rb
+        MRUBY_TARGET: travis
         YACC: /usr/local/opt/bison/bin/bison
 
   Windows-MinGW:
@@ -61,7 +61,7 @@ jobs:
     - name: build and test
       run: rake -E '$stdout.sync=true' -j4 test
       env:
-        MRUBY_CONFIG: travis_config.rb
+        MRUBY_TARGET: travis
         YACC: win_bison
         CFLAGS: -g -O1 -Wall -Wundef
 
@@ -88,7 +88,7 @@ jobs:
       shell: cmd
       run: C:\tools\cygwin\bin\ruby.exe /usr/bin/rake -m -j4 -E 'STDOUT.sync=true' test
       env:
-        MRUBY_CONFIG: travis_config.rb
+        MRUBY_TARGET: travis
 
   Windows-VC:
     runs-on: windows-latest
@@ -102,7 +102,7 @@ jobs:
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         rake -E "STDOUT.sync=true" test
       env:
-        MRUBY_CONFIG: appveyor_config.rb
+        MRUBY_TARGET: appveyor
         YACC: win_bison
         # TODO(take-cheeze): Re-enable /O2
         CFLAGS: "/c /nologo /W3 /we4013 /Zi /MD /D_CRT_SECURE_NO_WARNINGS"
