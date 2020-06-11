@@ -19,7 +19,7 @@ mrb_func_basic_p(mrb_state *mrb, mrb_value obj, mrb_sym mid, mrb_func_t func)
 {
   struct RClass *c = mrb_class(mrb, obj);
   mrb_method_t m = mrb_method_search_vm(mrb, &c, mid);
-  struct RProc *p;
+  const struct RProc *p;
 
   if (MRB_METHOD_UNDEF_P(m)) return FALSE;
   if (MRB_METHOD_FUNC_P(m))
@@ -130,7 +130,7 @@ mrb_f_block_given_p_m(mrb_state *mrb, mrb_value self)
   mrb_callinfo *ci = &mrb->c->ci[-1];
   mrb_callinfo *cibase = mrb->c->cibase;
   mrb_value *bp;
-  struct RProc *p;
+  const struct RProc *p;
 
   if (ci <= cibase) {
     /* toplevel does not have block */
