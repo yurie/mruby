@@ -21,7 +21,7 @@ jobs:
     - name: apt
       run: sudo apt install ruby gperf bison gcc g++
     - name: build and test
-      run: rake -m -j4 all test
+      run: rake -m -j4 gensym all test
       env:
         MRUBY_TARGET: travis
         CC: gcc
@@ -34,7 +34,7 @@ jobs:
     - name: apt
       run: sudo apt install ruby gperf bison
     - name: build and test
-      run: rake -m -j4 all test
+      run: rake -m -j4 gensym all test
       env:
         MRUBY_TARGET: travis
         CC: clang
@@ -59,7 +59,7 @@ jobs:
     - name: chocolatey
       run: choco install -y ruby winflexbison gperf
     - name: build and test
-      run: rake -E '$stdout.sync=true' -j4 test
+      run: rake -E '$stdout.sync=true' -j4 gensym all test
       env:
         MRUBY_TARGET: travis
         YACC: win_bison
@@ -86,7 +86,7 @@ jobs:
         echo '::set-env name=PATH::C:\tools\cygwin\bin;C:\tools\cygwin\usr\bin'
     - name: build and test
       shell: cmd
-      run: C:\tools\cygwin\bin\ruby.exe /usr/bin/rake -E 'STDOUT.sync=true' test
+      run: C:\tools\cygwin\bin\ruby.exe /usr/bin/rake -E 'STDOUT.sync=true' gensym test
       env:
         MRUBY_TARGET: travis
 
@@ -100,7 +100,7 @@ jobs:
       shell: cmd
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        rake -E "STDOUT.sync=true" test
+        rake -E "STDOUT.sync=true" gensym all test
       env:
         MRUBY_TARGET: appveyor
         YACC: win_bison
